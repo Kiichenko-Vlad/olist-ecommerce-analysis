@@ -91,11 +91,11 @@ olist-ecommerce-analysis/
 │   ├── 01_eda.ipynb                 ← Первинне дослідження даних
 │   ├── 02_etl.ipynb                 ← ETL-пайплайн
 │   ├── 03_visualizations.ipynb      ← Візуалізації
-│   ├── 04_analysis.ipynb            ← SQL-аналіз та статистичні гіпотези
+│   ├── 04_analysis.ipynb            ← Статистичні гіпотези
 │   └── 05_conclusions.ipynb         ← Зведені висновки та рекомендації
 ├── sql/
 │   ├── create_tables.sql            ← DDL-скрипт (7 таблиць)
-│   └── queries/
+│   └── queries/                     ← SQL-аналіз
 │       ├── q01_monthly_orders.sql
 │       ├── q02_top_categories_revenue.sql
 │       ├── q03_delivery_time_by_state.sql
