@@ -1,0 +1,19 @@
+# .gitignore
+
+# Середовище
+.env
+.venv/
+
+# Python
+__pycache__/
+*.pyc
+
+# Дані (не комітимо — посилання на Kaggle в README)
+data/raw/
+
+# Логи
+logs/
+
+# macOS
+.DS_Store
+**/.DS_Store
