@@ -1,16 +1,17 @@
 /*
-Project: Olist E-Commerce Analysis
-Query: Top 10 Sellers by Order Volume with Quality Metrics
-Author: Vlad Kiichenko
+Проєкт: Olist E-Commerce Analysis
+Запит: Топ-10 продавців за обсягом замовлень з метриками якості
+Автор: Vlad Kiichenko
 
-Purpose:
-Identify the most active sellers and evaluate whether high order volume
-correlates with service quality. Uses avg_score, critical_pct (1-star share),
-and negative_pct (1–2 star share) for a multi-dimensional quality view.
+Призначення:
+Визначити найактивніших продавців та оцінити, чи корелює високий обсяг
+замовлень з якістю сервісу. Використовує avg_score, critical_pct (частка
+оцінок 1 зірка) та negative_pct (частка 1–2 зірки) для багатовимірної
+оцінки якості.
 */
 
--- Business Question:
--- Who are the top 10 most active sellers, and do high-volume sellers maintain service quality?
+-- Бізнес-питання:
+-- Хто топ-10 продавців за активністю і яка їхня середня оцінка?
 
 WITH seller_orders AS  (	
 	SELECT
@@ -36,11 +37,11 @@ seller_metrics AS (
 		ROUND(
     		  AVG(CASE WHEN orv.score = 1 THEN 100.0 ELSE 0 END) 
         	  FILTER (WHERE orv.score IS NOT NULL), 2
-              ) AS critical_pct,
+        	  ) AS critical_pct,
 		ROUND(
 		      AVG(CASE WHEN orv.score <= 2 THEN 100.0 ELSE 0 END) 
 		      FILTER (WHERE orv.score IS NOT NULL), 2
-              ) AS negative_pct
+		      ) AS negative_pct
 	FROM seller_orders AS so
 	LEFT JOIN order_reviews AS orv
 		ON so.order_id = orv.order_id
@@ -64,11 +65,10 @@ FROM ranked
 WHERE seller_rank <= 10
 ORDER BY seller_rank;
 
--- Notes:
--- LEFT JOIN order_reviews retains sellers with no reviews (their avg_score will be NULL)
--- critical_pct  = % of 1-star reviews only — most severe dissatisfaction signal
--- negative_pct  = % of 1–2 star reviews — broader dissatisfaction indicator
--- FILTER (WHERE score IS NOT NULL) excludes unreviewed orders from percentage calculations;
---   without it, LEFT JOIN NULLs would resolve to 0 via CASE WHEN and dilute critical_pct / negative_pct
--- All top 10 sellers are in SP state — significant geographic concentration risk
--- Volume–quality correlation is weak: critical_pct ranges 7.74%–14.73% among top 10
+-- Примітки:
+-- LEFT JOIN order_reviews: продавці без відгуків мають залишатися у результаті; INNER JOIN мовчки виключив би їх із рейтингу
+-- FILTER (WHERE score IS NOT NULL): критично важливий захист коректності — без нього NULL з LEFT JOIN давали б 0 через CASE WHEN і занижували б
+--   critical_pct / negative_pct за рахунок замовлень без відгуків
+-- 100.0 у CASE WHEN примушує до ділення з плаваючою точкою; ціле число 1 у деяких крайніх випадках дало б 0 після AVG
+-- COUNT(DISTINCT order_id): одне замовлення може містити кілька позицій від одного продавця через order_items; DISTINCT запобігає завищенню
+-- status NOT IN ('canceled', 'unavailable'): активність продавця включає відправлені та оброблювані замовлення, не лише доставлені

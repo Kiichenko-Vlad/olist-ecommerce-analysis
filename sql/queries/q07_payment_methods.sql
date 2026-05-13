@@ -1,16 +1,16 @@
 /*
-Project: Olist E-Commerce Analysis
-Query: Payment Method Distribution and Average Order Value
-Author: Vlad Kiichenko
+Проєкт: Olist E-Commerce Analysis
+Запит: Розподіл способів оплати та середній чек
+Автор: Vlad Kiichenko
 
-Purpose:
-Analyze how customers are distributed across payment methods and whether
-payment type correlates with order value, to inform checkout UX design
-and payment partnership strategy.
+Призначення:
+Проаналізувати розподіл клієнтів за способами оплати та з'ясувати,
+чи корелює тип оплати із середнім чеком — для прийняття рішень щодо
+UX оплати та стратегії платіжного партнерства.
 */
 
--- Business Question:
--- How are payment methods distributed, and does payment type influence average order value?
+-- Бізнес-питання:
+-- Який середній чек по кожному типу оплати?
 
 WITH order_total_by_payment AS (
     SELECT
@@ -29,12 +29,8 @@ FROM order_total_by_payment
 GROUP BY payment_type
 ORDER BY orders_count DESC;
 
--- Notes:
--- Aggregated at (order_id, payment_type) level to avoid double-counting installment rows
--- Total records (~102k) > total orders (~99k): some orders use multiple payment methods
--- credit_card: 75.24% — driven by Brazilian parcelamento (interest-free installments up to 12 months)
--- boleto: 19.46% — bank slip for customers without credit cards; critical channel to retain
--- avg_order_value for credit_card (R$163.94) and boleto (R$145.03) differ by only 13%:
---   payment type does NOT correlate with order size — they represent distinct audience segments
--- voucher avg is low (R$98.15) because it is typically used as partial payment alongside credit_card
--- 3 records with payment_type = 'not_defined' (value = 0) are a data anomaly; negligible impact
+-- Примітки:
+-- CTE агрегує на рівні (order_id, payment_type) до основного SELECT: без цього рядки розстрочок (один рядок на кожен внесок) завищують
+--   orders_count і спотворюють avg_order_value
+-- Загальна кількість записів у CTE (~102k) > замовлень (~99k): очікувано — замовлення з кількома способами оплати дають кілька рядків на order_id
+-- 3 записи з payment_type = 'not_defined' і value = 0 — аномалія вихідних даних; включені для повноти, вплив на аналіз незначний

@@ -1,17 +1,17 @@
 /*
-Project: Olist E-Commerce Analysis
-Query: Average Delivery Time by State with Stage Breakdown
-Author: Vlad Kiichenko
+Проєкт: Olist E-Commerce Analysis
+Запит(Q3): Середній час доставки по штатах з розбивкою за етапами
+Автор: Vlad Kiichenko
 
-Purpose:
-Identify states with the longest delivery times and pinpoint whether delays
-originate at the seller handling stage or the carrier transit stage.
-Provides a data-driven basis for logistics partner negotiations
-and warehouse placement decisions.
+Призначення:
+Визначити штати з найдовшим часом доставки та з'ясувати, де виникає
+затримка — на етапі обробки замовлення продавцем чи під час транзиту
+перевізника. Надає аналітичну основу для переговорів з логістичними
+партнерами та рішень щодо розміщення складів.
 */
 
--- Business Question:
--- Which states have the worst delivery performance, and is the bottleneck the seller or the carrier?
+-- Бізнес-питання:
+-- Який середній час доставки по штатах і де найгірша логістика?
 
 WITH delivered_orders AS (
 	SELECT
@@ -56,12 +56,9 @@ SELECT
 	late_pct
 FROM state_metrics;
 
--- Notes:
--- Only 'delivered' orders with non-null delivered_to_carrier_at are included;
---   this ensures all three stage metrics share the same denominator (no NULL mismatch)
--- seller_handling_days  = purchased_at → delivered_to_carrier_at
--- carrier_transit_days  = delivered_to_carrier_at → delivered_to_customer_at
--- total_days            = purchased_at → delivered_to_customer_at
--- late_pct = % of orders delivered after estimated_delivery_at
--- avg_seller_handling is ~3–4 days across all 27 states: the bottleneck is the carrier, not sellers
--- States RR, AP, AC have small samples (41–80 orders); interpret results with caution
+-- Примітки:
+-- Умова delivered_to_carrier_at IS NOT NULL обов'язкова на додаток до delivered_to_customer_at: забезпечує однаковий знаменник для всіх
+--   трьох метрик (seller_handling, carrier_transit, total); без неї розбивка по етапах неможлива
+-- Умова delivered_to_customer_at >= purchased_at захищає від аномалій даних, де дата доставки передує даті замовлення (логічна неможливість)
+-- EXTRACT(EPOCH FROM interval) / 86400: PostgreSQL-специфічна конвертація інтервалу у дробові дні (секунди → дні)
+-- PERCENTILE_CONT(0.5): медіана стійкіша за AVG для скошених розподілів часу доставки з викидами

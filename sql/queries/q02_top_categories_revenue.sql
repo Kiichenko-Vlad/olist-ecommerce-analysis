@@ -1,17 +1,18 @@
 /*
-Project: Olist E-Commerce Analysis
-Query: Top 10 Product Categories by Revenue
-Author: Vlad Kiichenko
+Проєкт: Olist E-Commerce Analysis
+Запит(Q2): Топ-10 категорій товарів за виручкою
+Автор: Vlad Kiichenko
 
-Purpose:
-Identify the highest-revenue product categories and their logistics cost ratio
-to guide sourcing and marketing investment decisions.
-Distinguishes high-margin "light" categories from heavy-logistics ones
-by showing freight as a percentage of product revenue.
+Призначення:
+Визначити категорії з найвищою виручкою та їхнє співвідношення витрат
+на логістику для прийняття рішень щодо пріоритизації асортименту
+та маркетингових інвестицій.
+Відрізняє "легкі" категорії з низькими логістичними витратами від
+важких категорій з високою часткою фрахту у виручці.
 */
 
--- Business Question:
--- Which 10 product categories generate the most revenue, and how does freight cost affect their margins?
+-- Бізнес-питання:
+-- Які топ-10 категорій генерують найбільший дохід?
 
 WITH total_category_price AS (
 	SELECT
@@ -49,9 +50,9 @@ WHERE true
 	AND revenue_rank <= 10
 ORDER BY revenue_rank;
 
--- Notes:
--- Revenue = SUM(price) without freight, per PM request (product revenue only)
--- freight_pct_of_revenue is an additional margin indicator:
---   high % = heavier logistics burden (e.g. bed_bath_table ~20%, watches_gifts ~8%)
--- DENSE_RANK handles potential revenue ties correctly
--- category = 'unknown' excluded (products without valid classification)
+-- Примітки:
+-- Фільтр status = 'delivered' через JOIN з orders: враховуються тільки завершені транзакції; виручка скасованих або відправлених
+--   замовлень ще не реалізована
+-- Категорія 'unknown' виключена: ці товари не отримали валідної класифікації під час ETL-трансформації і непридатні для групування
+-- freight_value виключено з виручки: SUM(price) вимірює дохід від продажу товару; фрахт — транзитна вартість, а не дохід платформи
+-- DENSE_RANK замість ROW_NUMBER: коректно обробляє збіги виручки без довільного пропуску рангів

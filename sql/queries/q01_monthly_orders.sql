@@ -1,16 +1,15 @@
 /*
-Project: Olist E-Commerce Analysis
-Query: Monthly Order Volume Dynamics (2016–2018)
-Author: Vlad Kiichenko
+Проєкт: Olist E-Commerce Analysis
+Запит(Q1): Динаміка кількості замовлень по місяцях (2016–2018)
+Автор: Vlad Kiichenko
 
-Purpose:
-Track month-over-month order volume to assess platform growth trajectory
-and identify seasonal patterns (e.g. Black Friday) for investor presentations
-and operational capacity planning.
+Призначення:
+Відстеження кількості замовлень у розрізі місяців для оцінки траєкторії
+зростання платформи та виявлення сезонних піків (наприклад, Black Friday).
 */
 
--- Business Question:
--- How has the order volume grown over time, and are there seasonal peaks?
+--Бізнес-питання:
+-- Яка динаміка замовлень по місяцях — чи росте платформа?
 
 SELECT
     TO_CHAR(DATE_TRUNC('month', o.purchased_at), 'YYYY-MM') AS period,
@@ -19,8 +18,8 @@ FROM orders AS o
 GROUP BY period
 ORDER BY period ASC;
 
--- Notes:
--- All order statuses included (incl. canceled) to reflect full platform activity
--- Data for Sep–Dec 2016 and Aug–Oct 2018 is incomplete due to dataset cutoff;
---   low values at period edges are data artifacts, not real business decline
--- Nov 2017 spike expected: Black Friday in Brazil is the largest annual shopping peak
+-- Примітки:
+-- Фільтр по статусу відсутній: скасовані замовлення є частиною реального обсягу активності платформи; фільтрація тільки по
+--   'delivered' занизила б фактичний попит
+-- Місяці з 0 замовлень відсутні у результаті — стандартна поведінка GROUP BY, не прогалина в даних
+-- Вер–груд 2016 і вер–жовт 2018 мають аномально низькі значення через обрізку датасету, а не через реальне падіння бізнесу
