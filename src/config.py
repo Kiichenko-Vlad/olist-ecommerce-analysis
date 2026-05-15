@@ -4,7 +4,7 @@ src/config.py
 Централізовані налаштування проєкту Olist.
 
 Читає змінні з .env і надає:
-- PROJECT_ROOT, DATA_DIR, LOGS_DIR — шляхи до файлів
+- PROJECT_ROOT, DATA_DIR — шляхи до файлів
 - DATABASE_URL                     — рядок підключення до PostgreSQL
 - get_engine()                     — SQLAlchemy engine для роботи з БД
 """

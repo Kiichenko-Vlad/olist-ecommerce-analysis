@@ -23,7 +23,6 @@ src/transformers.py
 
 import pandas as pd
 
-
 # ── Приватні хелпери ─────────────────────────────────────────
 # Винесені з clean_*(), щоб не копіювати один і той самий
 # патерн «порахуй → відфільтруй → виведи» 20 разів.
@@ -112,11 +111,6 @@ def clean_customers(df: pd.DataFrame) -> pd.DataFrame:
     """
     olist_customers_dataset.csv → таблиця customers.
 
-    Перейменування:
-        customer_zip_code_prefix → zip_code_prefix
-        customer_city            → city
-        customer_state           → state
-
     Залишаємо всі 5 колонок — всі входять до схеми БД.
     Чистка: нормалізація тексту (lowercase city, uppercase state),
     zip_code_prefix → рядок з ведучими нулями (01310, а не 1310).
@@ -161,14 +155,6 @@ def clean_customers(df: pd.DataFrame) -> pd.DataFrame:
 def clean_orders(df: pd.DataFrame) -> pd.DataFrame:
     """
     olist_orders_dataset.csv → таблиця orders.
-
-    Перейменування:
-        order_status                   → status
-        order_purchase_timestamp       → purchased_at
-        order_approved_at              → approved_at
-        order_delivered_carrier_date   → delivered_to_carrier_at
-        order_delivered_customer_date  → delivered_to_customer_at
-        order_estimated_delivery_date  → estimated_delivery_at
 
     Всі 8 колонок CSV входять до схеми БД — нічого не відкидаємо.
 
@@ -298,10 +284,6 @@ def clean_order_payments(df: pd.DataFrame) -> pd.DataFrame:
     """
     olist_order_payments_dataset.csv → таблиця order_payments.
 
-    Перейменування:
-        payment_installments → installments
-        payment_value        → value
-
     Composite PK: (order_id, payment_sequential) — обидва залишаємо.
     Всі 5 колонок CSV входять до схеми БД.
 
@@ -355,13 +337,6 @@ def clean_order_payments(df: pd.DataFrame) -> pd.DataFrame:
 def clean_order_reviews(df: pd.DataFrame) -> pd.DataFrame:
     """
     olist_order_reviews_dataset.csv → таблиця order_reviews.
-
-    Перейменування:
-        review_score            → score
-        review_comment_title    → comment_title
-        review_comment_message  → comment_message
-        review_creation_date    → created_at
-        review_answer_timestamp → answered_at
 
     Чистка: score ∈ [1, 5], strip текстових полів.
 
@@ -441,18 +416,6 @@ def clean_products(
 
     Ця функція приймає ДВА DataFrame і робить LEFT MERGE між ними.
     LEFT MERGE — зберігаємо всі продукти навіть якщо translation не знайдено.
-
-    Перейменування:
-        product_photos_qty → photos_qty
-        product_weight_g   → weight_g
-        product_length_cm  → length_cm
-        product_height_cm  → height_cm
-        product_width_cm   → width_cm
-
-    Відкидаємо:
-        product_category_name      (португальська — замінена англійською)
-        product_name_lenght        (typo + не в схемі)
-        product_description_lenght (typo + не в схемі)
 
     Чистка:
         category NULL → 'unknown' (перед merge!)
@@ -557,11 +520,6 @@ def clean_sellers(df: pd.DataFrame) -> pd.DataFrame:
     """
     olist_sellers_dataset.csv → таблиця sellers.
 
-    Перейменування:
-        seller_zip_code_prefix → zip_code_prefix
-        seller_city            → city
-        seller_state           → state
-
     Всі 4 колонки CSV входять до схеми БД — нічого не відкидаємо.
     Чистка: нормалізація тексту (lowercase city, uppercase state).
 
@@ -604,12 +562,6 @@ def clean_sellers(df: pd.DataFrame) -> pd.DataFrame:
 def clean_geolocation(df: pd.DataFrame) -> pd.DataFrame:
     """
     olist_geolocation_dataset.csv → агрегований довідник (~15k рядків).
-
-    Проблема: ~1 млн рядків, але тільки ~15k унікальних zip-кодів.
-    На один zip — десятки GPS-точок (різні вулиці одного поштового індексу).
-
-    Рішення: groupby zip_code + agg(median) → 1 точка на zip.
-    Медіана краща за mean — стійка до outliers (хибних координат).
 
     Результат НЕ завантажується в основні таблиці БД.
     Використовується у Кроці 5 для побудови географічних карт.
